@@ -1,0 +1,3196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GitForge — The Ultimate Interactive Git Mastery & Command Hub</title>
+  <meta name="description" content="A comprehensive, interactive single-page guide to Git version control. 65+ commands, visual workflows, emergency recovery, terminal simulator, and internals.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* CSS Variables & Theme Setup */
+    :root {
+      --bg-dark: #0a0d14;
+      --bg-card: #121824;
+      --bg-card-hover: #182030;
+      --bg-subtle: #1c2538;
+      --border-color: #243048;
+      --border-accent: #334466;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-subtle: #64748b;
+      
+      --git-orange: #f05032;
+      --git-orange-glow: rgba(240, 80, 50, 0.25);
+      --git-blue: #38bdf8;
+      --git-purple: #c084fc;
+      --git-green: #34d399;
+      --git-yellow: #fbbf24;
+      --git-red: #f87171;
+
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-mono: 'Fira Code', 'SF Mono', Consolas, 'Cascadia Code', monospace;
+      
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+      --radius-xl: 24px;
+      
+      --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.4);
+      --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.5);
+      --shadow-glow: 0 0 35px var(--git-orange-glow);
+      --transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      color-scheme: dark;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      line-height: 1.6;
+      overflow-x: hidden;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Background atmospheric glows */
+    .bg-glow-1 {
+      position: fixed;
+      top: -150px;
+      left: 15%;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(240, 80, 50, 0.12) 0%, rgba(10, 13, 20, 0) 70%);
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    .bg-glow-2 {
+      position: fixed;
+      bottom: 10%;
+      right: 5%;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(56, 189, 248, 0.08) 0%, rgba(10, 13, 20, 0) 70%);
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    /* Container */
+    .container {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Navigation Bar */
+    header.site-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      background: rgba(10, 13, 20, 0.85);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .nav-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 72px;
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--text-main);
+      font-weight: 800;
+      font-size: 1.25rem;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-icon {
+      width: 34px;
+      height: 34px;
+      background: linear-gradient(135deg, var(--git-orange), #ff7b59);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 16px var(--git-orange-glow);
+    }
+
+    .brand-icon svg {
+      width: 22px;
+      height: 22px;
+      fill: #ffffff;
+    }
+
+    .brand span {
+      background: linear-gradient(to right, #ffffff, #94a3b8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand .badge-pro {
+      background: rgba(240, 80, 50, 0.15);
+      border: 1px solid rgba(240, 80, 50, 0.4);
+      color: #ff856e;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 12px;
+      margin-left: 4px;
+      -webkit-text-fill-color: #ff856e;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .nav-links a:hover {
+      color: var(--text-main);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .search-hint-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 7px 14px;
+      border-radius: var(--radius-md);
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: var(--transition);
+    }
+
+    .search-hint-btn:hover {
+      border-color: var(--git-orange);
+      color: var(--text-main);
+    }
+
+    .kbd-shortcut {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-accent);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--git-blue);
+    }
+
+    /* Hero Section */
+    .hero {
+      padding: 70px 0 50px;
+      text-align: center;
+      position: relative;
+    }
+
+    .hero-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(240, 80, 50, 0.1);
+      border: 1px solid rgba(240, 80, 50, 0.3);
+      padding: 6px 16px;
+      border-radius: 50px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #ff7b59;
+      margin-bottom: 24px;
+      box-shadow: 0 0 20px rgba(240, 80, 50, 0.15);
+    }
+
+    .hero-pill .dot {
+      width: 8px;
+      height: 8px;
+      background-color: var(--git-orange);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    .hero h1 {
+      font-size: 3.5rem;
+      font-weight: 800;
+      line-height: 1.15;
+      letter-spacing: -0.03em;
+      margin-bottom: 20px;
+      max-width: 900px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .gradient-text {
+      background: linear-gradient(135deg, #ffffff 30%, #f05032 80%, #ff8a65 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero p.lead {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      max-width: 720px;
+      margin: 0 auto 36px;
+      font-weight: 400;
+    }
+
+    /* Live Search Header Box */
+    .search-hero-box {
+      max-width: 720px;
+      margin: 0 auto 30px;
+      position: relative;
+    }
+
+    .search-input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .search-input-wrapper svg.search-icon {
+      position: absolute;
+      left: 18px;
+      width: 20px;
+      height: 20px;
+      color: var(--text-subtle);
+      pointer-events: none;
+    }
+
+    .search-hero-input {
+      width: 100%;
+      background: var(--bg-card);
+      border: 2px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 18px 50px 18px 50px;
+      font-size: 1.05rem;
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      outline: none;
+      transition: var(--transition);
+      box-shadow: var(--shadow-md);
+    }
+
+    .search-hero-input:focus {
+      border-color: var(--git-orange);
+      box-shadow: 0 0 25px var(--git-orange-glow);
+    }
+
+    .search-hero-input::placeholder {
+      color: var(--text-subtle);
+    }
+
+    .search-clear-btn {
+      position: absolute;
+      right: 18px;
+      background: transparent;
+      border: none;
+      color: var(--text-subtle);
+      cursor: pointer;
+      font-size: 1.1rem;
+      display: none;
+      padding: 4px;
+    }
+
+    .search-clear-btn:hover {
+      color: var(--text-main);
+    }
+
+    .stats-row {
+      display: flex;
+      justify-content: center;
+      gap: 36px;
+      flex-wrap: wrap;
+      margin-top: 36px;
+    }
+
+    .stat-badge {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .stat-badge strong {
+      color: var(--text-main);
+      font-family: var(--font-mono);
+      font-size: 1.1rem;
+    }
+
+    .stat-badge .icon-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--git-orange);
+    }
+
+    /* Section Headers */
+    .section-head {
+      margin-bottom: 36px;
+      text-align: left;
+    }
+
+    .section-eyebrow {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: var(--git-orange);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .section-title {
+      font-size: 2.2rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--text-main);
+      margin-bottom: 12px;
+    }
+
+    .section-subtitle {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      max-width: 760px;
+    }
+
+    /* 4 STAGES VISUALIZER */
+    .stages-section {
+      padding: 50px 0 70px;
+    }
+
+    .stage-canvas-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-xl);
+      padding: 36px;
+      box-shadow: var(--shadow-md);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stages-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+      position: relative;
+      margin-bottom: 30px;
+    }
+
+    .stage-column {
+      background: var(--bg-dark);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 22px 18px;
+      transition: var(--transition);
+      cursor: pointer;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .stage-column:hover, .stage-column.active {
+      border-color: var(--git-orange);
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(240, 80, 50, 0.15);
+    }
+
+    .stage-badge {
+      display: inline-block;
+      align-self: flex-start;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      padding: 4px 10px;
+      border-radius: 50px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .stage-column:nth-child(1) .stage-badge { background: rgba(248, 113, 113, 0.15); color: #f87171; }
+    .stage-column:nth-child(2) .stage-badge { background: rgba(251, 191, 36, 0.15); color: #fbbf24; }
+    .stage-column:nth-child(3) .stage-badge { background: rgba(56, 189, 248, 0.15); color: #38bdf8; }
+    .stage-column:nth-child(4) .stage-badge { background: rgba(52, 211, 153, 0.15); color: #34d399; }
+
+    .stage-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .stage-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.45;
+      margin-bottom: 16px;
+      flex-grow: 1;
+    }
+
+    .stage-file-state {
+      background: var(--bg-subtle);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .stage-file-state .file-tag {
+      display: block;
+      margin-top: 4px;
+      font-size: 0.72rem;
+      color: var(--git-orange);
+    }
+
+    /* Interactive Pipeline Flow Connector */
+    .pipeline-connectors {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 20px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .connector-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 0.88rem;
+    }
+
+    .connector-label {
+      width: 140px;
+      font-weight: 600;
+      color: var(--text-muted);
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .connector-commands {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      flex-grow: 1;
+    }
+
+    .cmd-pill {
+      background: var(--bg-card);
+      border: 1px solid var(--border-accent);
+      color: #e2e8f0;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      padding: 5px 12px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .cmd-pill:hover {
+      border-color: var(--git-blue);
+      color: var(--git-blue);
+      background: rgba(56, 189, 248, 0.05);
+    }
+
+    .cmd-pill svg {
+      width: 14px;
+      height: 14px;
+      opacity: 0.6;
+    }
+
+    /* COMMAND EXPLORER SECTION */
+    .explorer-section {
+      padding: 60px 0;
+    }
+
+    .category-filter-bar {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 12px;
+      margin-bottom: 28px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border-color) transparent;
+    }
+
+    .category-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 9px 18px;
+      border-radius: 50px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .category-btn:hover {
+      border-color: var(--text-muted);
+      color: var(--text-main);
+    }
+
+    .category-btn.active {
+      background: var(--git-orange);
+      border-color: var(--git-orange);
+      color: #ffffff;
+      box-shadow: 0 0 16px var(--git-orange-glow);
+    }
+
+    .category-btn .cat-count {
+      background: rgba(255, 255, 255, 0.2);
+      padding: 1px 6px;
+      border-radius: 10px;
+      font-size: 0.72rem;
+    }
+
+    .category-btn:not(.active) .cat-count {
+      background: var(--bg-subtle);
+      color: var(--text-subtle);
+    }
+
+    /* Commands Grid */
+    .commands-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: 20px;
+    }
+
+    .cmd-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      transition: var(--transition);
+      position: relative;
+    }
+
+    .cmd-card:hover {
+      border-color: var(--border-accent);
+      background: var(--bg-card-hover);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .cmd-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .cmd-tag {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 3px 9px;
+      border-radius: 4px;
+      letter-spacing: 0.05em;
+    }
+
+    .tag-basics { background: rgba(56, 189, 248, 0.15); color: #38bdf8; }
+    .tag-commit { background: rgba(52, 211, 153, 0.15); color: #34d399; }
+    .tag-branch { background: rgba(192, 132, 252, 0.15); color: #c084fc; }
+    .tag-undo { background: rgba(248, 113, 113, 0.15); color: #f87171; }
+    .tag-remote { background: rgba(251, 191, 36, 0.15); color: #fbbf24; }
+    .tag-advanced { background: rgba(244, 63, 94, 0.15); color: #f43f5e; }
+
+    .cmd-level {
+      font-size: 0.75rem;
+      color: var(--text-subtle);
+    }
+
+    .cmd-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--text-main);
+    }
+
+    .cmd-desc {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin-bottom: 16px;
+      flex-grow: 1;
+    }
+
+    .code-box {
+      background: var(--bg-dark);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+      position: relative;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .code-box code {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      color: #ff9e88;
+      word-break: break-all;
+    }
+
+    .copy-btn {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-accent);
+      color: var(--text-muted);
+      padding: 5px 9px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: var(--transition);
+      flex-shrink: 0;
+      margin-left: 10px;
+    }
+
+    .copy-btn:hover {
+      background: var(--git-orange);
+      border-color: var(--git-orange);
+      color: #ffffff;
+    }
+
+    .copy-btn.copied {
+      background: var(--git-green);
+      border-color: var(--git-green);
+      color: #0a0d14;
+      font-weight: 600;
+    }
+
+    .pro-tip {
+      font-size: 0.78rem;
+      color: var(--text-subtle);
+      border-top: 1px dashed var(--border-color);
+      padding-top: 10px;
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+    }
+
+    .pro-tip strong {
+      color: var(--git-blue);
+    }
+
+    /* EMERGENCY 911 / RESCUE SECTION */
+    .rescue-section {
+      padding: 60px 0;
+    }
+
+    .rescue-banner {
+      background: linear-gradient(135deg, rgba(248, 113, 113, 0.08) 0%, rgba(18, 24, 36, 1) 100%);
+      border: 1px solid rgba(248, 113, 113, 0.3);
+      border-radius: var(--radius-xl);
+      padding: 36px;
+      margin-bottom: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .rescue-banner-text h3 {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: #fca5a5;
+      margin-bottom: 8px;
+    }
+
+    .rescue-banner-text p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      max-width: 650px;
+    }
+
+    .rescue-pulse-icon {
+      width: 60px;
+      height: 60px;
+      background: rgba(248, 113, 113, 0.15);
+      border: 1px solid rgba(248, 113, 113, 0.4);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #f87171;
+      font-size: 1.8rem;
+      flex-shrink: 0;
+    }
+
+    .crisis-accordion {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .crisis-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      transition: var(--transition);
+    }
+
+    .crisis-item:hover {
+      border-color: var(--border-accent);
+    }
+
+    .crisis-header {
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .crisis-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .crisis-badge {
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+    }
+
+    .badge-panic-crit { background: rgba(248, 113, 113, 0.2); color: #f87171; }
+    .badge-panic-med { background: rgba(251, 191, 36, 0.2); color: #fbbf24; }
+    .badge-panic-low { background: rgba(56, 189, 248, 0.2); color: #38bdf8; }
+
+    .crisis-q {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .crisis-toggle-icon {
+      color: var(--text-subtle);
+      transition: transform 0.25s ease;
+      font-size: 1.2rem;
+    }
+
+    .crisis-item.open .crisis-toggle-icon {
+      transform: rotate(180deg);
+      color: var(--git-orange);
+    }
+
+    .crisis-body {
+      display: none;
+      padding: 0 24px 24px;
+      border-top: 1px solid var(--border-color);
+      background: rgba(10, 13, 20, 0.5);
+    }
+
+    .crisis-item.open .crisis-body {
+      display: block;
+      padding-top: 18px;
+    }
+
+    .crisis-explanation {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+
+    /* INTERNALS & CONCEPTS SECTION */
+    .internals-section {
+      padding: 60px 0;
+    }
+
+    .internals-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-bottom: 36px;
+    }
+
+    .internal-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 26px;
+      position: relative;
+    }
+
+    .internal-card h4 {
+      font-size: 1.15rem;
+      margin-bottom: 10px;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .internal-card p {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.55;
+      margin-bottom: 16px;
+    }
+
+    .objects-subgrid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+
+    .object-pill-card {
+      background: var(--bg-dark);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      text-align: center;
+    }
+
+    .object-pill-card .obj-type {
+      font-family: var(--font-mono);
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--git-purple);
+      margin-bottom: 6px;
+    }
+
+    .object-pill-card .obj-role {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      line-height: 1.35;
+    }
+
+    /* TERMINAL SIMULATOR SECTION */
+    .terminal-section {
+      padding: 60px 0;
+    }
+
+    .terminal-window {
+      background: #090c12;
+      border: 1px solid #273347;
+      border-radius: var(--radius-lg);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7);
+      overflow: hidden;
+      font-family: var(--font-mono);
+    }
+
+    .terminal-header {
+      background: #141c2b;
+      padding: 12px 18px;
+      border-bottom: 1px solid #273347;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .terminal-dots {
+      display: flex;
+      gap: 8px;
+    }
+
+    .t-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+
+    .t-dot.red { background: #ff5f56; }
+    .t-dot.yellow { background: #ffbd2e; }
+    .t-dot.green { background: #27c93f; }
+
+    .terminal-title {
+      font-size: 0.8rem;
+      color: var(--text-subtle);
+    }
+
+    .terminal-body {
+      padding: 20px;
+      min-height: 280px;
+      max-height: 380px;
+      overflow-y: auto;
+      font-size: 0.88rem;
+      line-height: 1.6;
+    }
+
+    .term-line {
+      margin-bottom: 6px;
+      white-space: pre-wrap;
+    }
+
+    .term-prompt {
+      color: var(--git-blue);
+    }
+
+    .term-cmd {
+      color: #ffffff;
+      font-weight: 600;
+    }
+
+    .term-output {
+      color: var(--text-muted);
+    }
+
+    .term-success {
+      color: var(--git-green);
+    }
+
+    .term-warn {
+      color: var(--git-yellow);
+    }
+
+    .term-danger {
+      color: var(--git-red);
+    }
+
+    .term-input-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .term-input {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #ffffff;
+      font-family: var(--font-mono);
+      font-size: 0.88rem;
+      flex-grow: 1;
+    }
+
+    .terminal-quick-chips {
+      background: #0f1523;
+      padding: 12px 20px;
+      border-top: 1px solid #273347;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .terminal-quick-chips span {
+      font-size: 0.75rem;
+      color: var(--text-subtle);
+    }
+
+    .term-chip {
+      background: #1c273c;
+      border: 1px solid #324364;
+      color: #93c5fd;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .term-chip:hover {
+      background: var(--git-orange);
+      border-color: var(--git-orange);
+      color: #ffffff;
+    }
+
+    /* QUIZ SECTION */
+    .quiz-section {
+      padding: 60px 0;
+    }
+
+    .quiz-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-xl);
+      padding: 36px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .quiz-progress {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .quiz-progress-bar {
+      height: 6px;
+      background: var(--bg-subtle);
+      border-radius: 6px;
+      flex-grow: 1;
+      margin: 0 16px;
+      overflow: hidden;
+    }
+
+    .quiz-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--git-orange), var(--git-yellow));
+      width: 20%;
+      transition: width 0.3s ease;
+    }
+
+    .quiz-question-box h3 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      line-height: 1.4;
+    }
+
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .quiz-option-btn {
+      background: var(--bg-dark);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 14px 18px;
+      color: var(--text-main);
+      font-size: 0.92rem;
+      text-align: left;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .quiz-option-btn:hover:not(:disabled) {
+      border-color: var(--git-orange);
+      background: var(--bg-card-hover);
+    }
+
+    .quiz-option-btn.correct {
+      border-color: var(--git-green) !important;
+      background: rgba(52, 211, 153, 0.15) !important;
+      color: #6ee7b7;
+    }
+
+    .quiz-option-btn.wrong {
+      border-color: var(--git-red) !important;
+      background: rgba(248, 113, 113, 0.15) !important;
+      color: #fca5a5;
+    }
+
+    .quiz-feedback {
+      display: none;
+      padding: 14px 18px;
+      border-radius: var(--radius-md);
+      font-size: 0.88rem;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+
+    .quiz-feedback.show {
+      display: block;
+    }
+
+    .quiz-feedback.success {
+      background: rgba(52, 211, 153, 0.1);
+      border: 1px solid rgba(52, 211, 153, 0.3);
+      color: #6ee7b7;
+    }
+
+    .quiz-feedback.fail {
+      background: rgba(248, 113, 113, 0.1);
+      border: 1px solid rgba(248, 113, 113, 0.3);
+      color: #fca5a5;
+    }
+
+    .quiz-nav-btn {
+      background: var(--git-orange);
+      color: #ffffff;
+      border: none;
+      padding: 12px 24px;
+      border-radius: var(--radius-md);
+      font-weight: 600;
+      cursor: pointer;
+      display: none;
+      margin-left: auto;
+      transition: var(--transition);
+    }
+
+    .quiz-nav-btn:hover {
+      background: #e04022;
+    }
+
+    /* ALIASES & CONFIG SECTION */
+    .aliases-section {
+      padding: 60px 0 80px;
+    }
+
+    .config-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-xl);
+      padding: 36px;
+    }
+
+    .config-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+      align-items: center;
+    }
+
+    .config-text h3 {
+      font-size: 1.6rem;
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+
+    .config-text p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-bottom: 20px;
+    }
+
+    .config-features-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      font-size: 0.88rem;
+      color: var(--text-main);
+    }
+
+    .config-features-list li {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .config-features-list li span.dot {
+      color: var(--git-green);
+    }
+
+    .config-box {
+      background: var(--bg-dark);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      position: relative;
+    }
+
+    .config-box pre {
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      color: #93c5fd;
+      overflow-x: auto;
+      max-height: 260px;
+      line-height: 1.5;
+    }
+
+    .config-box .copy-config-btn {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+    }
+
+    /* TOAST NOTIFICATION */
+    .toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 9999;
+      pointer-events: none;
+    }
+
+    .toast {
+      background: #1e293b;
+      border: 1px solid var(--border-accent);
+      color: #ffffff;
+      padding: 12px 20px;
+      border-radius: var(--radius-md);
+      font-size: 0.88rem;
+      box-shadow: var(--shadow-md);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transform: translateY(30px);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .toast .toast-icon {
+      color: var(--git-green);
+    }
+
+    /* FOOTER */
+    footer.site-footer {
+      border-top: 1px solid var(--border-color);
+      background: #080a10;
+      padding: 48px 0;
+      color: var(--text-muted);
+      font-size: 0.88rem;
+    }
+
+    .footer-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 20px;
+      list-style: none;
+    }
+
+    .footer-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: var(--transition);
+    }
+
+    .footer-links a:hover {
+      color: var(--text-main);
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .stages-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .internals-grid {
+        grid-template-columns: 1fr;
+      }
+      .objects-subgrid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .config-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .nav-links {
+        display: none;
+      }
+      .hero h1 {
+        font-size: 2.4rem;
+      }
+      .stages-grid {
+        grid-template-columns: 1fr;
+      }
+      .commands-grid {
+        grid-template-columns: 1fr;
+      }
+      .rescue-banner {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .rescue-pulse-icon {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background Ambient Glow -->
+  <div class="bg-glow-1"></div>
+  <div class="bg-glow-2"></div>
+
+  <!-- Navigation Header -->
+  <header class="site-header">
+    <div class="nav-container">
+      <a href="#" class="brand">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24">
+            <path d="M2.6 10.59L8.38 4.8a1.7 1.7 0 0 1 2.4 0l1.41 1.41-2.4 2.4a1.72 1.72 0 0 0-.48 1.48l-2.09 2.09a1.72 1.72 0 1 0 1.2 1.2l2.05-2.05c.44.17.96.11 1.34-.27.4-.4.49-1 .26-1.46l2.36-2.36 1.41 1.41a1.7 1.7 0 0 1 0 2.4l-5.78 5.79a1.7 1.7 0 0 1-2.4 0l-7.25-7.25a1.7 1.7 0 0 1 0-2.4z"/>
+          </svg>
+        </div>
+        <span>Git<strong>Forge</strong></span>
+        <span class="badge-pro">2.40+</span>
+      </a>
+
+      <ul class="nav-links">
+        <li><a href="#stages">4 Stages Flow</a></li>
+        <li><a href="#commands">Commands</a></li>
+        <li><a href="#rescue">Rescue 911</a></li>
+        <li><a href="#internals">Git Internals</a></li>
+        <li><a href="#terminal">Live Sandbox</a></li>
+        <li><a href="#quiz">Skill Quiz</a></li>
+        <li><a href="#aliases">Aliases</a></li>
+      </ul>
+
+      <div class="header-actions">
+        <button class="search-hint-btn" onclick="document.getElementById('searchInput').focus();">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+          Search <span class="kbd-shortcut">/</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <main class="container">
+    <section class="hero">
+      <div class="hero-pill">
+        <span class="dot"></span>
+        Interactive Version Control & Architecture Hub
+      </div>
+
+      <h1>
+        Master Git from Everyday Commits<br>
+        <span class="gradient-text">to Deep Internals & Recovery</span>
+      </h1>
+
+      <p class="lead">
+        The ultimate single-page handbook for Git developers. Explore 60+ commands, visual transitions across the 4 stages, emergency rescue recipes, live terminal simulator, and conventional commit standards.
+      </p>
+
+      <!-- Search Box in Hero -->
+      <div class="search-hero-box">
+        <div class="search-input-wrapper">
+          <svg class="search-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path>
+          </svg>
+          <input 
+            type="text" 
+            id="searchInput" 
+            class="search-hero-input" 
+            placeholder="Type any command, flag or problem (e.g. 'rebase', 'undo commit', 'stash', 'branch -d')..."
+            autocomplete="off"
+            spellcheck="false"
+          >
+          <button id="searchClearBtn" class="search-clear-btn" title="Clear search">✕</button>
+        </div>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-badge"><span class="icon-dot"></span><strong>4 Stages</strong> Mental Model</div>
+        <div class="stat-badge"><span class="icon-dot"></span><strong id="totalCmdsBadge">60+</strong> Curated Commands</div>
+        <div class="stat-badge"><span class="icon-dot"></span><strong>8 Panic</strong> Emergency Recipes</div>
+        <div class="stat-badge"><span class="icon-dot"></span><strong>Interactive</strong> Terminal Sandbox</div>
+      </div>
+    </section>
+
+    <!-- SECTION 1: 4 STAGES MENTAL MODEL -->
+    <section class="stages-section" id="stages">
+      <div class="section-head">
+        <div class="section-eyebrow">
+          <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+          Mental Model
+        </div>
+        <h2 class="section-title">The 4 Core Stages of Git</h2>
+        <p class="section-subtitle">
+          Git is not just a backup tool—it is a transition state machine. Files travel across four distinct environments. Click any stage to inspect its file state and active transitions.
+        </p>
+      </div>
+
+      <div class="stage-canvas-card">
+        <div class="stages-grid" id="stagesGrid">
+          <!-- Stage 1 -->
+          <div class="stage-column active" onclick="highlightStage(0)">
+            <span class="stage-badge">01. LOCAL FS</span>
+            <h3 class="stage-title">Working Directory</h3>
+            <p class="stage-desc">Your real files on disk. Any edit, creation, or deletion starts here before Git tracks it.</p>
+            <div class="stage-file-state">
+              <code>Unmodified | Modified | Untracked</code>
+              <span class="file-tag">Inspect: git status / git diff</span>
+            </div>
+          </div>
+
+          <!-- Stage 2 -->
+          <div class="stage-column" onclick="highlightStage(1)">
+            <span class="stage-badge">02. CACHE</span>
+            <h3 class="stage-title">Staging Area (Index)</h3>
+            <p class="stage-desc">The staging room for your next snapshot. Lets you craft precise, atomic commits piece-by-piece.</p>
+            <div class="stage-file-state">
+              <code>Staged for next commit</code>
+              <span class="file-tag">Inspect: git diff --staged</span>
+            </div>
+          </div>
+
+          <!-- Stage 3 -->
+          <div class="stage-column" onclick="highlightStage(2)">
+            <span class="stage-badge">03. LOCAL REPO</span>
+            <h3 class="stage-title">Local Repository</h3>
+            <p class="stage-desc">Permanent commit snapshots inside your <code>.git/</code> directory. Where HEAD points.</p>
+            <div class="stage-file-state">
+              <code>Committed history (HEAD)</code>
+              <span class="file-tag">Inspect: git log --oneline</span>
+            </div>
+          </div>
+
+          <!-- Stage 4 -->
+          <div class="stage-column" onclick="highlightStage(3)">
+            <span class="stage-badge">04. CLOUD / SERVER</span>
+            <h3 class="stage-title">Remote Repository</h3>
+            <p class="stage-desc">Central server hosted on GitHub, GitLab, or Bitbucket for asynchronous team collaboration.</p>
+            <div class="stage-file-state">
+              <code>origin/main, origin/dev</code>
+              <span class="file-tag">Inspect: git remote -v</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pipeline Connectors Box -->
+        <div class="pipeline-connectors">
+          <div class="connector-row">
+            <span class="connector-label">Moving Forward ➔</span>
+            <div class="connector-commands">
+              <span class="cmd-pill" onclick="searchFor('git add')"><code>git add &lt;file&gt;</code> <small>(Work ➔ Stage)</small></span>
+              <span class="cmd-pill" onclick="searchFor('git commit')"><code>git commit -m "..."</code> <small>(Stage ➔ Local)</small></span>
+              <span class="cmd-pill" onclick="searchFor('git push')"><code>git push origin &lt;branch&gt;</code> <small>(Local ➔ Remote)</small></span>
+            </div>
+          </div>
+
+          <div class="connector-row">
+            <span class="connector-label">Pulling Back ⬅</span>
+            <div class="connector-commands">
+              <span class="cmd-pill" onclick="searchFor('git fetch')"><code>git fetch / git pull</code> <small>(Remote ➔ Local)</small></span>
+              <span class="cmd-pill" onclick="searchFor('git restore --staged')"><code>git restore --staged &lt;file&gt;</code> <small>(Stage ➔ Work)</small></span>
+              <span class="cmd-pill" onclick="searchFor('git restore')"><code>git restore &lt;file&gt;</code> <small>(Discard edits in Work)</small></span>
+              <span class="cmd-pill" onclick="searchFor('git reset')"><code>git reset --soft HEAD~1</code> <small>(Local ➔ Stage)</small></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 2: COMMAND EXPLORER -->
+    <section class="explorer-section" id="commands">
+      <div class="section-head">
+        <div class="section-eyebrow">
+          <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+          Comprehensive Reference
+        </div>
+        <h2 class="section-title">Categorized Git Command Explorer</h2>
+        <p class="section-subtitle">
+          Click any category pill or use the real-time search above. Every command includes instant 1-click copying, syntax examples, and battle-tested pro tips.
+        </p>
+      </div>
+
+      <!-- Category Filter Pills -->
+      <div class="category-filter-bar" id="categoryFilterBar">
+        <button class="category-btn active" data-category="all">All <span class="cat-count" id="count-all">0</span></button>
+        <button class="category-btn" data-category="setup">Setup & Config <span class="cat-count" id="count-setup">0</span></button>
+        <button class="category-btn" data-category="snapshot">Staging & Commit <span class="cat-count" id="count-snapshot">0</span></button>
+        <button class="category-btn" data-category="branch">Branching & Merge <span class="cat-count" id="count-branch">0</span></button>
+        <button class="category-btn" data-category="history">History & Inspect <span class="cat-count" id="count-history">0</span></button>
+        <button class="category-btn" data-category="undo">Undo & Recovery <span class="cat-count" id="count-undo">0</span></button>
+        <button class="category-btn" data-category="stash">Stash & Clean <span class="cat-count" id="count-stash">0</span></button>
+        <button class="category-btn" data-category="remote">Remote & Sync <span class="cat-count" id="count-remote">0</span></button>
+        <button class="category-btn" data-category="advanced">Pro & Internals <span class="cat-count" id="count-advanced">0</span></button>
+      </div>
+
+      <!-- Commands Grid -->
+      <div class="commands-grid" id="commandsContainer">
+        <!-- Rendered dynamically via JavaScript for ultra-fast filtering -->
+      </div>
+    </section>
+
+    <!-- SECTION 3: EMERGENCY RESCUE 911 -->
+    <section class="rescue-section" id="rescue">
+      <div class="rescue-banner">
+        <div class="rescue-banner-text">
+          <div class="section-eyebrow" style="color: #f87171;">
+            🚨 Emergency Room
+          </div>
+          <h3>Git Rescue 911: "Oh Crap, Git!"</h3>
+          <p>
+            We've all been there: accidentally committed to the wrong branch, leaked a token, wiped a branch, or ended up in a detached HEAD. Here are the exact battle-tested remedies.
+          </p>
+        </div>
+        <div class="rescue-pulse-icon">
+          🆘
+        </div>
+      </div>
+
+      <div class="crisis-accordion" id="crisisAccordion">
+        <!-- Crisis 1 -->
+        <div class="crisis-item open">
+          <div class="crisis-header" onclick="toggleCrisis(this)">
+            <div class="crisis-title-wrap">
+              <span class="crisis-badge badge-panic-crit">PANIC</span>
+              <span class="crisis-q">"I committed to the wrong branch (e.g. directly on main)!"</span>
+            </div>
+            <span class="crisis-toggle-icon">▼</span>
+          </div>
+          <div class="crisis-body">
+            <p class="crisis-explanation">
+              You wanted to create a new feature branch, but accidentally made commits straight onto <code>main</code> without switching first. You need to migrate those commits to a new branch and restore <code>main</code>.
+            </p>
+            <div class="code-box">
+              <code>git branch feature-login &amp;&amp; git reset --hard HEAD~1 &amp;&amp; git checkout feature-login</code>
+              <button class="copy-btn" onclick="copySnippet(this, 'git branch feature-login && git reset --hard HEAD~1 && git checkout feature-login')">Copy</button>
+            </div>
+            <p class="pro-tip">
+              <strong>How it works:</strong> Creates <code>feature-login</code> pointing at your current commit, rewinds <code>main</code> by 1 commit safely, then switches to your new branch. No work lost!
+            </p>
+          </div>
+        </div>
+
+        <!-- Crisis 2 -->
+        <div class="crisis-item">
+          <div class="crisis-header" onclick="toggleCrisis(this)">
+            <div class="crisis-title-wrap">
+              <span class="crisis-badge badge-panic-crit">SECURITY</span>
+              <span class="crisis-q">"I accidentally committed sensitive credentials (.env or API key)!"</span>
+            </div>
+            <span class="crisis-toggle-icon">▼</span>
+          </div>
+          <div class="crisis-body">
+            <p class="crisis-explanation">
+              If you haven't pushed yet, undo the commit while keeping all changes in your working directory, remove the file from Git tracking, and add it to <code>.gitignore</code>.
+            </p>
+            <div class="code-box">
+              <code>git reset --soft HEAD~1 &amp;&amp; git restore --staged .env &amp;&amp; echo ".env" &gt;&gt; .gitignore</code>
+              <button class="copy-btn" onclick="copySnippet(this, 'git reset --soft HEAD~1 && git restore --staged .env && echo \".env\" >> .gitignore')">Copy</button>
+            </div>
+            <p class="pro-tip">
+              <strong>Notice:</strong> If already pushed to a public remote, revoke/rotate the secret immediately! A Git history rewrite tool like <code>git-filter-repo</code> or BFG is required to scrub old pushed blobs.
+            </p>
+          </div>
+        </div>
+
+        <!-- Crisis 3 -->
+        <div class="crisis-item">
+          <div class="crisis-header" onclick="toggleCrisis(this)">
+            <div class="crisis-title-wrap">
+              <span class="crisis-badge badge-panic-med">TYPO / FORGOT</span>
+              <span class="crisis-q">"I made a commit with a typo in the message or forgot to include a file"</span>
+            </div>
+            <span class="crisis-toggle-icon">▼</span>
+          </div>
+          <div class="crisis-body">
+            <p class="crisis-explanation">
+              Amend allows updating the most recent commit without creating a messy "fix typo" commit in your log.
+            </p>
+            <div class="code-box">
+              <code>git add forgotten-file.js &amp;&amp; git commit --amend -m "feat: corrected commit message"</code>
+              <button class="copy-btn" onclick="copySnippet(this, 'git add forgotten-file.js && git commit --amend -m \"feat: corrected commit message\"')">Copy</button>
+            </div>
+            <p class="pro-tip">
+              <strong>Tip:</strong> If you only want to add the file without changing the message, use: <code>git commit --amend --no-edit</code>.
+            </p>
+          </div>
+        </div>
+
+        <!-- Crisis 4 -->
+        <div class="crisis-item">
+          <div class="crisis-header" onclick="toggleCrisis(this)">
+            <div class="crisis-title-wrap">
+              <span class="crisis-badge badge-panic-crit">CATASTROPHE</span>
+              <span class="crisis-q">"I ran 'git reset --hard' and deleted my recent work! Is it gone forever?"</span>
+            </div>
+            <span class="crisis-toggle-icon">▼</span>
+          </div>
+          <div class="crisis-body">
+            <p class="crisis-explanation">
+              In Git, almost nothing that was ever committed is truly lost! <code>git reflog</code> keeps a secret log of every time HEAD moved in the last 30 to 90 days.
+            </p>
+            <div class="code-box">
+              <code>git reflog &amp;&amp; git reset --hard HEAD@{1}</code>
+              <button class="copy-btn" onclick="copySnippet(this, 'git reflog && git reset --hard HEAD@{1}')">Copy</button>
+            </div>
+            <p class="pro-tip">
+              <strong>Rescue step:</strong> Run <code>git reflog</code>, find the SHA hash from right before you executed the fatal command, and run <code>git checkout -b rescue-branch &lt;SHA&gt;</code>.
+            </p>
+          </div>
+        </div>
+
+        <!-- Crisis 5 -->
+        <div class="crisis-item">
+          <div class="crisis-header" onclick="toggleCrisis(this)">
+            <div class="crisis-title-wrap">
+              <span class="crisis-badge badge-panic-med">ACCIDENT</span>
+              <span class="crisis-q">"I accidentally deleted a branch with 'git branch -D'!"</span>
+            </div>
+            <span class="crisis-toggle-icon">▼</span>
+          </div>
+          <div class="crisis-body">
+            <p class="crisis-explanation">
+              A branch in Git is merely a 41-byte text file containing a commit SHA. When you delete a branch, only the pointer is removed; the commits still exist in your object database!
+            </p>
+            <div class="code-box">
+              <code>git reflog | grep "checkout: moving" &amp;&amp; git checkout -b &lt;branch-name&gt; &lt;SHA&gt;</code>
+              <button class="copy-btn" onclick="copySnippet(this, 'git reflog | grep \"checkout: moving\" && git checkout -b <branch-name> <SHA>')">Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Crisis 6 -->
+        <div class="crisis-item">
+          <div class="crisis-header" onclick="toggleCrisis(this)">
+            <div class="crisis-title-wrap">
+              <span class="crisis-badge badge-panic-low">CONFLICT</span>
+              <span class="crisis-q">"I am in the middle of a bad merge conflict or rebase loop and want to ABORT!"</span>
+            </div>
+            <span class="crisis-toggle-icon">▼</span>
+          </div>
+          <div class="crisis-body">
+            <p class="crisis-explanation">
+              Take a breath! You can cleanly abort and return your repository to the exact pristine state it was in before starting the merge or rebase.
+            </p>
+            <div class="code-box">
+              <code>git merge --abort    # If merging | git rebase --abort   # If rebasing</code>
+              <button class="copy-btn" onclick="copySnippet(this, 'git merge --abort')">Copy Merge Abort</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Crisis 7 -->
+        <div class="crisis-item">
+          <div class="crisis-header" onclick="toggleCrisis(this)">
+            <div class="crisis-title-wrap">
+              <span class="crisis-badge badge-panic-low">HEAD</span>
+              <span class="crisis-q">"Git says 'You are in detached HEAD state'. What does that mean?"</span>
+            </div>
+            <span class="crisis-toggle-icon">▼</span>
+          </div>
+          <div class="crisis-body">
+            <p class="crisis-explanation">
+              Normally <code>HEAD</code> points to a branch name (which points to a commit). A detached HEAD means <code>HEAD</code> is pointing directly to a specific commit. If you commit here, no branch tracks it.
+            </p>
+            <div class="code-box">
+              <code>git switch -c new-experimental-branch   # Keep work | git switch main  # Discard and go back</code>
+              <button class="copy-btn" onclick="copySnippet(this, 'git switch -c new-experimental-branch')">Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Crisis 8 -->
+        <div class="crisis-item">
+          <div class="crisis-header" onclick="toggleCrisis(this)">
+            <div class="crisis-title-wrap">
+              <span class="crisis-badge badge-panic-med">SHARED REMOTE</span>
+              <span class="crisis-q">"I pushed a bad commit to production main! How do I safely undo it?"</span>
+            </div>
+            <span class="crisis-toggle-icon">▼</span>
+          </div>
+          <div class="crisis-body">
+            <p class="crisis-explanation">
+              Never use <code>git reset</code> on public branches because it rewires shared history and breaks teammates' repositories. Instead, use <code>git revert</code> to record an inverse commit.
+            </p>
+            <div class="code-box">
+              <code>git revert &lt;bad-commit-hash&gt; &amp;&amp; git push origin main</code>
+              <button class="copy-btn" onclick="copySnippet(this, 'git revert HEAD && git push origin main')">Copy</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 4: GIT INTERNALS & ARCHITECTURE -->
+    <section class="internals-section" id="internals">
+      <div class="section-head">
+        <div class="section-eyebrow">
+          <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm1 15h-2v-6h2zm0-8h-2V7h2z"/></svg>
+          Deep Understanding
+        </div>
+        <h2 class="section-title">Under the Hood: How Git Actually Works</h2>
+        <p class="section-subtitle">
+          Underneath the CLI commands, Git is not an incremental diff storage engine. Git is a content-addressable key-value store powered by a Merkle Directed Acyclic Graph (DAG).
+        </p>
+      </div>
+
+      <div class="internals-grid">
+        <div class="internal-card">
+          <h4>
+            <span style="color: var(--git-orange);">🗂</span> The .git Anatomy
+          </h4>
+          <p>
+            Every Git repo has a <code>.git</code> hidden directory that holds 100% of the project history, configuration, and state:
+          </p>
+          <ul style="list-style: none; font-size: 0.84rem; display: flex; flex-direction: column; gap: 8px; color: var(--text-muted); font-family: var(--font-mono);">
+            <li><strong style="color: #ffffff;">HEAD:</strong> Points to current active ref (e.g. <code>ref: refs/heads/main</code>)</li>
+            <li><strong style="color: #ffffff;">objects/:</strong> Zlib-compressed content-addressed blobs &amp; trees</li>
+            <li><strong style="color: #ffffff;">refs/heads/:</strong> Branch tip pointers containing 40-character SHAs</li>
+            <li><strong style="color: #ffffff;">index:</strong> Binary file caching the staging area snapshot</li>
+            <li><strong style="color: #ffffff;">config:</strong> Local repo configuration, remotes, and aliases</li>
+          </ul>
+        </div>
+
+        <div class="internal-card">
+          <h4>
+            <span style="color: var(--git-blue);">🔀</span> Merge vs Rebase
+          </h4>
+          <p>
+            Understanding when to merge and when to rebase keeps Git history clean and comprehensible:
+          </p>
+          <div style="background: var(--bg-dark); padding: 12px; border-radius: 6px; font-family: var(--font-mono); font-size: 0.8rem; margin-bottom: 12px; line-height: 1.4;">
+            <div style="color: var(--git-green);">Merge: preserves exact history &amp; branch timeline. Creates a 2-parent merge commit.</div>
+            <div style="margin-top: 8px; color: var(--git-purple);">Rebase: replays commits on top of base. Produces a pristine linear history.</div>
+          </div>
+          <p style="font-size: 0.8rem; color: #f87171;">
+            <strong>Golden Rule of Rebase:</strong> Never rebase commits that you have already pushed to a shared remote repository!
+          </p>
+        </div>
+
+        <div class="internal-card">
+          <h4>
+            <span style="color: var(--git-green);">🏷</span> Conventional Commits
+          </h4>
+          <p>
+            Standardize commit messages so machines and humans can generate automated changelogs and semantic versions:
+          </p>
+          <div style="font-family: var(--font-mono); font-size: 0.8rem; display: flex; flex-direction: column; gap: 6px; color: var(--text-muted);">
+            <div><strong style="color: #38bdf8;">feat:</strong> New user-facing capability</div>
+            <div><strong style="color: #f87171;">fix:</strong> Bug fix in production</div>
+            <div><strong style="color: #fbbf24;">refactor:</strong> Code restructure, no API change</div>
+            <div><strong style="color: #34d399;">perf:</strong> Performance improvement</div>
+            <div><strong style="color: #c084fc;">chore:</strong> Build scripts, dependencies, setup</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- The 4 Git Object Types -->
+      <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 16px;">The 4 Fundamental Git Object Types</h3>
+      <div class="objects-subgrid">
+        <div class="object-pill-card">
+          <div class="obj-type">1. Blob</div>
+          <div class="obj-role">Stores raw binary file contents compressed with zlib. Does NOT store filename, timestamp, or permissions!</div>
+        </div>
+        <div class="object-pill-card">
+          <div class="obj-type">2. Tree</div>
+          <div class="obj-role">Represents a directory. Contains a list of filenames, execution modes, and SHA-1 pointers to blobs or sub-trees.</div>
+        </div>
+        <div class="object-pill-card">
+          <div class="obj-type">3. Commit</div>
+          <div class="obj-role">Points to a top-level Tree object, parent commit(s), author timestamp, committer info, and commit message.</div>
+        </div>
+        <div class="object-pill-card">
+          <div class="obj-type">4. Annotated Tag</div>
+          <div class="obj-role">Permanent reference pointing to a specific commit object with a tagger identity, date, GPG signature, and message.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 5: LIVE TERMINAL SIMULATOR -->
+    <section class="terminal-section" id="terminal">
+      <div class="section-head">
+        <div class="section-eyebrow">
+          <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M4 17l6-5-6-5v10zm8 0h8v-2h-8v2z"/></svg>
+          Interactive Sandbox
+        </div>
+        <h2 class="section-title">In-Browser Git Terminal Simulator</h2>
+        <p class="section-subtitle">
+          Test and practice real Git commands directly in your browser. State updates dynamically as you add, commit, branch, and inspect!
+        </p>
+      </div>
+
+      <div class="terminal-window">
+        <div class="terminal-header">
+          <div class="terminal-dots">
+            <span class="t-dot red"></span>
+            <span class="t-dot yellow"></span>
+            <span class="t-dot green"></span>
+          </div>
+          <div class="terminal-title">bash — git-forge-demo (main)</div>
+          <div style="font-size: 0.72rem; color: var(--text-subtle);">Type 'help' or 'clear'</div>
+        </div>
+
+        <div class="terminal-body" id="termOutput">
+          <div class="term-line term-output">Welcome to the interactive GitForge Sandbox environment!</div>
+          <div class="term-line term-output">Current branch: <span style="color: #38bdf8; font-weight: 600;">main</span> | Repo: initialized with 1 commit</div>
+          <div class="term-line term-output">Try typing: <span style="color: #fbbf24;">git status</span>, <span style="color: #fbbf24;">git log</span>, or click any chip below:</div>
+          <div class="term-line"></div>
+        </div>
+
+        <div class="terminal-quick-chips">
+          <span>Quick Run:</span>
+          <button class="term-chip" onclick="simulateCmd('git status')">git status</button>
+          <button class="term-chip" onclick="simulateCmd('git add .')">git add .</button>
+          <button class="term-chip" onclick="simulateCmd('git commit -m &quot;feat: add payment gateway&quot;')">git commit</button>
+          <button class="term-chip" onclick="simulateCmd('git branch')">git branch</button>
+          <button class="term-chip" onclick="simulateCmd('git switch -c feature/auth')">git switch -c feature/auth</button>
+          <button class="term-chip" onclick="simulateCmd('git log --oneline')">git log --oneline</button>
+          <button class="term-chip" onclick="simulateCmd('clear')">clear</button>
+        </div>
+
+        <div style="background: #090c12; padding: 12px 20px; border-top: 1px solid #1c273c;">
+          <div class="term-input-row">
+            <span class="term-prompt">user@dev-machine:~/project$</span>
+            <input 
+              type="text" 
+              id="termInput" 
+              class="term-input" 
+              placeholder="Type git command here..." 
+              autocomplete="off" 
+              spellcheck="false"
+            >
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 6: KNOWLEDGE QUIZ -->
+    <section class="quiz-section" id="quiz">
+      <div class="section-head" style="text-align: center;">
+        <div class="section-eyebrow" style="justify-content: center;">
+          <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 16h-2v-2h2zm1.07-7.75l-.9.92C12.45 11.9 12 12.5 12 14h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H7c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.04-.42 1.99-1.07 2.75z"/></svg>
+          Skill Check
+        </div>
+        <h2 class="section-title">Test Your Git Mastery</h2>
+        <p class="section-subtitle" style="margin: 0 auto;">
+          Challenge your understanding of Git's tricky edge cases, branching models, and reset mechanics.
+        </p>
+      </div>
+
+      <div class="quiz-card">
+        <div class="quiz-progress">
+          <span id="quizQuestionCount">Question 1 of 5</span>
+          <div class="quiz-progress-bar">
+            <div class="quiz-progress-fill" id="quizProgressFill"></div>
+          </div>
+          <span id="quizScoreText">Score: 0/0</span>
+        </div>
+
+        <div class="quiz-question-box">
+          <h3 id="quizQuestionText">Loading question...</h3>
+          <div class="quiz-options" id="quizOptionsContainer">
+            <!-- Options populated by JS -->
+          </div>
+          <div class="quiz-feedback" id="quizFeedback"></div>
+          <button class="quiz-nav-btn" id="quizNextBtn" onclick="nextQuizQuestion()">Next Question ➔</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 7: PRO ALIASES & CONFIG -->
+    <section class="aliases-section" id="aliases">
+      <div class="config-card">
+        <div class="config-grid">
+          <div class="config-text">
+            <div class="section-eyebrow">
+              <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54A.48.48 0 0 0 14 2h-4a.48.48 0 0 0-.48.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 0 0-.59.22L2.64 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h4c.24 0 .44-.17.48-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+              Supercharge Workflow
+            </div>
+            <h3>Supercharge Your ~/.gitconfig</h3>
+            <p>
+              Professional Git users save dozens of keystrokes every hour with curated aliases and global default settings. Paste this snippet directly into your <code>~/.gitconfig</code> file.
+            </p>
+            <ul class="config-features-list">
+              <li><span class="dot">✔</span> <code>git lg</code>: Visual ASCII branch graph tree with author &amp; relative time</li>
+              <li><span class="dot">✔</span> <code>git st</code>: Short status showing untracked and branch tracking delta</li>
+              <li><span class="dot">✔</span> <code>git undo</code>: Instantly undo last commit while preserving code in staging</li>
+              <li><span class="dot">✔</span> <code>git discard</code>: Restore modified files to clean workspace</li>
+              <li><span class="dot">✔</span> <code>git aliases</code>: Display list of your configured custom shortcuts</li>
+            </ul>
+          </div>
+
+          <div class="config-box">
+            <button class="copy-btn copy-config-btn" onclick="copySnippet(this, gitConfigText)">Copy .gitconfig</button>
+            <pre><code>[alias]
+  # Visual graph log
+  lg = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)&lt;%an&gt;%Creset' --abbrev-commit --date=relative
+  
+  # Status &amp; shortcuts
+  st = status -sb
+  co = checkout
+  br = branch
+  ci = commit
+  
+  # Safe undo &amp; stage
+  unstage = restore --staged
+  discard = restore
+  undo = reset --soft HEAD~1
+  amend = commit --amend --no-edit
+
+  # Show all aliases
+  aliases = config --get-regexp alias
+
+[init]
+  defaultBranch = main
+
+[pull]
+  rebase = true
+
+[push]
+  autoSetupRemote = true</code></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Site Footer -->
+  <footer class="site-footer">
+    <div class="container footer-content">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <div class="brand-icon" style="width: 26px; height: 26px;">
+          <svg viewBox="0 0 24 24" style="width: 16px; height: 16px;"><path d="M2.6 10.59L8.38 4.8a1.7 1.7 0 0 1 2.4 0l1.41 1.41-2.4 2.4a1.72 1.72 0 0 0-.48 1.48l-2.09 2.09a1.72 1.72 0 1 0 1.2 1.2l2.05-2.05c.44.17.96.11 1.34-.27.4-.4.49-1 .26-1.46l2.36-2.36 1.41 1.41a1.7 1.7 0 0 1 0 2.4l-5.78 5.79a1.7 1.7 0 0 1-2.4 0l-7.25-7.25a1.7 1.7 0 0 1 0-2.4z"/></svg>
+        </div>
+        <span><strong>GitForge</strong> — Single-Page Interactive Git Reference &amp; Learning Portal</span>
+      </div>
+
+      <ul class="footer-links">
+        <li><a href="https://git-scm.com/doc" target="_blank" rel="noopener">Official Git Docs</a></li>
+        <li><a href="https://git-scm.com/book/en/v2" target="_blank" rel="noopener">Pro Git Book</a></li>
+        <li><a href="https://github.com" target="_blank" rel="noopener">GitHub</a></li>
+        <li><a href="#stages">Back to Top ↑</a></li>
+      </ul>
+    </div>
+  </footer>
+
+  <!-- Toast Notification element -->
+  <div class="toast-container">
+    <div class="toast" id="toast">
+      <span class="toast-icon">✔</span>
+      <span id="toastMsg">Command copied to clipboard!</span>
+    </div>
+  </div>
+
+  <!-- JavaScript Application Logic -->
+  <script>
+    // 1. DATA: 60+ Curated Git Commands with categorization and metadata
+    const gitCommandsData = [
+      // SETUP & CONFIG
+      {
+        id: "git-init",
+        category: "setup",
+        tag: "Setup",
+        level: "Beginner",
+        title: "Initialize a Repository",
+        cmd: "git init",
+        desc: "Creates an empty Git repository in current folder or reinitializes an existing one. Creates the hidden .git directory.",
+        tip: "Run 'git init -b main' to set default branch name on creation."
+      },
+      {
+        id: "git-clone",
+        category: "setup",
+        tag: "Setup",
+        level: "Beginner",
+        title: "Clone Remote Repository",
+        cmd: "git clone <repository-url>",
+        desc: "Downloads an entire remote repository, all branches, commit history, and sets up origin remote automatically.",
+        tip: "Use '--depth 1' for shallow clone to download only the latest commit and save time/bandwidth."
+      },
+      {
+        id: "git-config-user",
+        category: "setup",
+        tag: "Setup",
+        level: "Beginner",
+        title: "Set User Identity Globally",
+        cmd: 'git config --global user.name "Your Name" && git config --global user.email "you@example.com"',
+        desc: "Sets your author name and email attached to all commits across every repository on your computer.",
+        tip: "Omit '--global' to set specific identities per project."
+      },
+      {
+        id: "git-config-editor",
+        category: "setup",
+        tag: "Setup",
+        level: "Beginner",
+        title: "Configure Default Editor",
+        cmd: 'git config --global core.editor "code --wait"',
+        desc: "Sets VS Code or your favorite editor as the default tool for writing commit messages and interactive rebase.",
+        tip: "Use 'nano' or 'vim' if you prefer command-line in-terminal editing."
+      },
+      {
+        id: "git-config-list",
+        category: "setup",
+        tag: "Setup",
+        level: "Beginner",
+        title: "Inspect Configuration",
+        cmd: "git config --list --show-origin",
+        desc: "Displays all configured settings and the exact configuration files (system, global, local) where each key is defined.",
+        tip: "Helps debug credential and author email issues."
+      },
+
+      // STAGING & COMMITS
+      {
+        id: "git-status",
+        category: "snapshot",
+        tag: "Staging",
+        level: "Beginner",
+        title: "Check Working Tree Status",
+        cmd: "git status -sb",
+        desc: "Displays paths that have differences between index and current commit, untracked files, and tracking branch delta.",
+        tip: "The '-sb' flag gives concise, clean status output."
+      },
+      {
+        id: "git-add-file",
+        category: "snapshot",
+        tag: "Staging",
+        level: "Beginner",
+        title: "Stage Specific File",
+        cmd: "git add <path/to/file>",
+        desc: "Adds file modifications or new untracked files to the staging area ready for the next commit snapshot.",
+        tip: "Staging allows building curated atomic commits."
+      },
+      {
+        id: "git-add-all",
+        category: "snapshot",
+        tag: "Staging",
+        level: "Beginner",
+        title: "Stage All Changes",
+        cmd: "git add .",
+        desc: "Stages all modifications, additions, and deletions in the current folder and subdirectories.",
+        tip: "Use 'git add -A' to stage files throughout entire repo root."
+      },
+      {
+        id: "git-add-patch",
+        category: "snapshot",
+        tag: "Staging",
+        level: "Intermediate",
+        title: "Interactive Patch Staging",
+        cmd: "git add -p",
+        desc: "Interactively prompts you hunk-by-hunk to stage only specific blocks of changes inside files.",
+        tip: "Crucial for separating unrelated changes into clean commits."
+      },
+      {
+        id: "git-commit-m",
+        category: "snapshot",
+        tag: "Commit",
+        level: "Beginner",
+        title: "Record Staged Changes",
+        cmd: 'git commit -m "feat: descriptive message"',
+        desc: "Takes all content currently staged in the index and stores a new permanent snapshot commit in local repository.",
+        tip: "Follow conventional commit format (feat:, fix:, docs:)."
+      },
+      {
+        id: "git-commit-am",
+        category: "snapshot",
+        tag: "Commit",
+        level: "Beginner",
+        title: "Stage Tracked & Commit in One Step",
+        cmd: 'git commit -am "fix: quick bug resolution"',
+        desc: "Automatically stages all modified tracked files and commits them in a single command. Does not stage brand-new files.",
+        tip: "Saves a step during rapid bug fixes."
+      },
+      {
+        id: "git-commit-amend",
+        category: "snapshot",
+        tag: "Commit",
+        level: "Intermediate",
+        title: "Amend Last Commit",
+        cmd: "git commit --amend --no-edit",
+        desc: "Adds current staged changes into the most recent commit without modifying its commit message.",
+        tip: "Never amend commits that have already been pushed to shared branches!"
+      },
+      {
+        id: "git-diff",
+        category: "snapshot",
+        tag: "Inspect",
+        level: "Beginner",
+        title: "View Unstaged Modifications",
+        cmd: "git diff",
+        desc: "Shows changes between your working tree and the staging area (Index) for tracked files.",
+        tip: "Review diff before staging to prevent accidental leftover debug statements."
+      },
+      {
+        id: "git-diff-staged",
+        category: "snapshot",
+        tag: "Inspect",
+        level: "Beginner",
+        title: "View Staged Modifications",
+        cmd: "git diff --staged",
+        desc: "Shows exactly what code changes are currently staged in the index and will be included in the next commit.",
+        tip: "Equivalent to 'git diff --cached'."
+      },
+
+      // BRANCHING & MERGING
+      {
+        id: "git-branch-list",
+        category: "branch",
+        tag: "Branch",
+        level: "Beginner",
+        title: "List Local Branches",
+        cmd: "git branch -a -v",
+        desc: "Lists all local and remote-tracking branches with their latest commit SHA and subject line.",
+        tip: "The active checked-out branch is marked with an asterisk (*)."
+      },
+      {
+        id: "git-switch-create",
+        category: "branch",
+        tag: "Branch",
+        level: "Beginner",
+        title: "Create and Switch Branch",
+        cmd: "git switch -c feature/new-page",
+        desc: "Creates a new branch starting from current HEAD and switches your working directory immediately to it.",
+        tip: "Modern Git (2.23+) prefers 'git switch' over ambiguous 'git checkout'."
+      },
+      {
+        id: "git-switch",
+        category: "branch",
+        tag: "Branch",
+        level: "Beginner",
+        title: "Switch to Existing Branch",
+        cmd: "git switch <branch-name>",
+        desc: "Switches working directory to an existing branch. Updates files to match that branch's tip.",
+        tip: "Git will prevent switching if uncommitted changes conflict."
+      },
+      {
+        id: "git-branch-rename",
+        category: "branch",
+        tag: "Branch",
+        level: "Intermediate",
+        title: "Rename Current Branch",
+        cmd: "git branch -m <new-branch-name>",
+        desc: "Renames the currently active branch locally.",
+        tip: "To rename a different branch: 'git branch -m <old> <new>'."
+      },
+      {
+        id: "git-branch-delete",
+        category: "branch",
+        tag: "Branch",
+        level: "Beginner",
+        title: "Safely Delete Merged Branch",
+        cmd: "git branch -d <branch-name>",
+        desc: "Deletes a local branch only if its changes have already been safely merged into current branch.",
+        tip: "Use uppercase '-D' to force delete unmerged branch."
+      },
+      {
+        id: "git-merge",
+        category: "branch",
+        tag: "Merge",
+        level: "Intermediate",
+        title: "Merge Branch Into Current",
+        cmd: "git merge <feature-branch>",
+        desc: "Incorporates changes from specified branch into currently checked-out branch. Performs fast-forward if possible.",
+        tip: "Use '--no-ff' to always create an explicit merge commit."
+      },
+      {
+        id: "git-merge-squash",
+        category: "branch",
+        tag: "Merge",
+        level: "Intermediate",
+        title: "Squash Merge Branch",
+        cmd: "git merge --squash <feature-branch>",
+        desc: "Combines all commits from feature branch into a single set of staged changes without committing.",
+        tip: "Ideal for condensing 20 experimental commits into 1 clean commit on main."
+      },
+      {
+        id: "git-merge-abort",
+        category: "branch",
+        tag: "Merge",
+        level: "Intermediate",
+        title: "Abort Conflicted Merge",
+        cmd: "git merge --abort",
+        desc: "Stops a conflicted merge process and restores working tree to pre-merge condition.",
+        tip: "Use anytime merge conflicts become unmanageable."
+      },
+      {
+        id: "git-rebase",
+        category: "branch",
+        tag: "Rebase",
+        level: "Intermediate",
+        title: "Rebase Branch on Base",
+        cmd: "git rebase main",
+        desc: "Re-applies commits of your current feature branch onto the tip of main for a clean linear history.",
+        tip: "Always pull latest main before rebasing."
+      },
+      {
+        id: "git-rebase-interactive",
+        category: "branch",
+        tag: "Rebase",
+        level: "Advanced",
+        title: "Interactive Rebase",
+        cmd: "git rebase -i HEAD~3",
+        desc: "Opens editor to reword, squash, edit, reorder, or drop the last 3 commits before submitting a PR.",
+        tip: "Change 'pick' to 'squash' or 's' to blend into previous commit."
+      },
+
+      // HISTORY & INSPECT
+      {
+        id: "git-log-graph",
+        category: "history",
+        tag: "History",
+        level: "Beginner",
+        title: "Visual Log Graph",
+        cmd: "git log --graph --oneline --all --decorate",
+        desc: "Displays an ASCII visual graph of branch forks, merges, tags, and commits across all branches.",
+        tip: "The single best command to inspect overall repo geometry."
+      },
+      {
+        id: "git-log-stat",
+        category: "history",
+        tag: "History",
+        level: "Beginner",
+        title: "Commit Log With File Stats",
+        cmd: "git log --stat -n 5",
+        desc: "Shows the last 5 commits with summary of files modified, lines inserted (+), and deleted (-).",
+        tip: "Great for quick code review before release."
+      },
+      {
+        id: "git-show",
+        category: "history",
+        tag: "History",
+        level: "Beginner",
+        title: "Inspect Single Commit",
+        cmd: "git show <commit-hash>",
+        desc: "Shows the full metadata (author, date, message) and complete unified diff introduced by that specific commit.",
+        tip: "Can also show tags or trees: 'git show v1.0.0'."
+      },
+      {
+        id: "git-blame",
+        category: "history",
+        tag: "Inspect",
+        level: "Intermediate",
+        title: "Line-by-Line File History",
+        cmd: "git blame -L 10,35 <filepath>",
+        desc: "Annotates each line in a file with the commit hash, author name, and date of the last edit.",
+        tip: "Use to understand why a legacy piece of logic was created."
+      },
+      {
+        id: "git-diff-commits",
+        category: "history",
+        tag: "Inspect",
+        level: "Intermediate",
+        title: "Diff Between Two Commits",
+        cmd: "git diff <commit-A>..<commit-B>",
+        desc: "Compares the exact code delta between two arbitrary commit hashes or branch pointers.",
+        tip: "Use 'git diff main..feature' to view all changes on feature branch."
+      },
+      {
+        id: "git-shortlog",
+        category: "history",
+        tag: "Inspect",
+        level: "Intermediate",
+        title: "Summarize Contributor Commits",
+        cmd: "git shortlog -sn --no-merges",
+        desc: "Summarizes commit counts per author in descending order, excluding merge commits.",
+        tip: "Useful for release notes and repository metrics."
+      },
+
+      // UNDO & RECOVERY
+      {
+        id: "git-restore-working",
+        category: "undo",
+        tag: "Undo",
+        level: "Beginner",
+        title: "Discard File Changes in Workspace",
+        cmd: "git restore <file>",
+        desc: "Discards uncommitted local modifications to a file, returning it to matching state in staging or HEAD.",
+        tip: "Replaces deprecated 'git checkout -- <file>'."
+      },
+      {
+        id: "git-restore-staged",
+        category: "undo",
+        tag: "Undo",
+        level: "Beginner",
+        title: "Unstage File (Keep Local Edits)",
+        cmd: "git restore --staged <file>",
+        desc: "Removes a file from the staging area while leaving its edits intact in your working directory.",
+        tip: "Replaces the confusing 'git reset HEAD <file>'."
+      },
+      {
+        id: "git-reset-soft",
+        category: "undo",
+        tag: "Undo",
+        level: "Intermediate",
+        title: "Undo Commit (Keep Code in Staging)",
+        cmd: "git reset --soft HEAD~1",
+        desc: "Rewinds the HEAD pointer by 1 commit. The changes from the undone commit remain staged in your index.",
+        tip: "Perfect if you made a commit too early and want to add more changes."
+      },
+      {
+        id: "git-reset-mixed",
+        category: "undo",
+        tag: "Undo",
+        level: "Intermediate",
+        title: "Undo Commit (Keep Code in Working Dir)",
+        cmd: "git reset HEAD~1",
+        desc: "Rewinds HEAD and unstages changes, keeping modifications in your working files. This is the default reset mode.",
+        tip: "Leaves working tree modified but uncommitted."
+      },
+      {
+        id: "git-reset-hard",
+        category: "undo",
+        tag: "Danger",
+        level: "Advanced",
+        title: "Discard Commits & Code Completely",
+        cmd: "git reset --hard HEAD~1",
+        desc: "Rewinds HEAD and permanently deletes all tracked modifications in both staging area and working files.",
+        tip: "Caution: Any uncommitted changes will be permanently destroyed!"
+      },
+      {
+        id: "git-revert",
+        category: "undo",
+        tag: "Undo",
+        level: "Intermediate",
+        title: "Safely Revert Pushed Commit",
+        cmd: "git revert <commit-hash>",
+        desc: "Creates a brand-new commit that applies the exact inverse diff of the specified commit.",
+        tip: "The safest way to undo a commit that was already pushed to remote."
+      },
+      {
+        id: "git-clean",
+        category: "undo",
+        tag: "Danger",
+        level: "Intermediate",
+        title: "Delete Untracked Files & Folders",
+        cmd: "git clean -fd",
+        desc: "Forcefully removes untracked files (-f) and untracked directories (-d) from working tree.",
+        tip: "Always test with dry-run first: 'git clean -nd'."
+      },
+
+      // STASH & CLEAN
+      {
+        id: "git-stash-save",
+        category: "stash",
+        tag: "Stash",
+        level: "Beginner",
+        title: "Stash Uncommitted Work",
+        cmd: 'git stash -u -m "wip: halfway through checkout page"',
+        desc: "Shelves dirty working directory and staging area, including untracked files (-u), restoring clean HEAD.",
+        tip: "Giving stash a message (-m) prevents losing track of what was inside."
+      },
+      {
+        id: "git-stash-pop",
+        category: "stash",
+        tag: "Stash",
+        level: "Beginner",
+        title: "Apply and Remove Latest Stash",
+        cmd: "git stash pop",
+        desc: "Re-applies the most recently stashed changes back onto current branch and drops it from the stash stack.",
+        tip: "Use 'git stash apply' if you want to keep the stash preserved in stack."
+      },
+      {
+        id: "git-stash-list",
+        category: "stash",
+        tag: "Stash",
+        level: "Beginner",
+        title: "List All Stashed Changes",
+        cmd: "git stash list",
+        desc: "Shows all saved stash entries formatted as stash@{0}, stash@{1}, with timestamps and messages.",
+        tip: "Inspect stash diff: 'git stash show -p stash@{0}'."
+      },
+      {
+        id: "git-stash-branch",
+        category: "stash",
+        tag: "Stash",
+        level: "Intermediate",
+        title: "Create Branch Directly From Stash",
+        cmd: "git stash branch <new-branch> stash@{0}",
+        desc: "Creates and switches to a new branch starting from commit where stash was made, then pops stash.",
+        tip: "Helps if applying stash on current branch causes conflicts."
+      },
+      {
+        id: "git-stash-drop",
+        category: "stash",
+        tag: "Stash",
+        level: "Beginner",
+        title: "Delete Specific Stash",
+        cmd: "git stash drop stash@{0}",
+        desc: "Permanently deletes a specific stash from the stash stack.",
+        tip: "Use 'git stash clear' to wipe out all saved stashes."
+      },
+
+      // REMOTES & COLLABORATION
+      {
+        id: "git-remote-add",
+        category: "remote",
+        tag: "Remote",
+        level: "Beginner",
+        title: "Link to Remote Repository",
+        cmd: "git remote add origin https://github.com/user/repo.git",
+        desc: "Sets up a named shortcut (origin) pointing to remote repository URL.",
+        tip: "Verify with 'git remote -v'."
+      },
+      {
+        id: "git-push-set-upstream",
+        category: "remote",
+        tag: "Remote",
+        level: "Beginner",
+        title: "Push & Set Upstream Tracking",
+        cmd: "git push -u origin <branch-name>",
+        desc: "Uploads local branch commits to remote repository and sets upstream tracking so future 'git push' needs no args.",
+        tip: "The '-u' flag is only required the very first time."
+      },
+      {
+        id: "git-fetch",
+        category: "remote",
+        tag: "Remote",
+        level: "Intermediate",
+        title: "Fetch Remote Updates Safely",
+        cmd: "git fetch origin --prune",
+        desc: "Downloads new commits, branches, and tags from remote without modifying your local working files.",
+        tip: "The '--prune' flag removes local references to branches deleted on remote."
+      },
+      {
+        id: "git-pull-rebase",
+        category: "remote",
+        tag: "Remote",
+        level: "Intermediate",
+        title: "Pull With Rebase (Clean History)",
+        cmd: "git pull --rebase origin main",
+        desc: "Fetches changes from remote and replays your local commits on top, preventing ugly superfluous merge commits.",
+        tip: "Configure globally with: 'git config --global pull.rebase true'."
+      },
+      {
+        id: "git-push-force-lease",
+        category: "remote",
+        tag: "Remote",
+        level: "Advanced",
+        title: "Safe Force Push",
+        cmd: "git push --force-with-lease origin <branch>",
+        desc: "Forces remote update but only if no teammate has pushed new commits since your last fetch.",
+        tip: "Never use plain 'git push --force'; always prefer '--force-with-lease'."
+      },
+      {
+        id: "git-remote-set-url",
+        category: "remote",
+        tag: "Remote",
+        level: "Intermediate",
+        title: "Switch Remote from HTTPS to SSH",
+        cmd: "git remote set-url origin git@github.com:user/repo.git",
+        desc: "Changes the target URL of existing remote, e.g. switching from password-based HTTPS to SSH keys.",
+        tip: "Solves authentication deprecation issues."
+      },
+
+      // PRO & INTERNALS
+      {
+        id: "git-reflog",
+        category: "advanced",
+        tag: "Pro",
+        level: "Advanced",
+        title: "Inspect HEAD Reference Log",
+        cmd: "git reflog --date=relative",
+        desc: "Chronological diary of every movement of HEAD pointer. Enables recovering lost commits, resets, and deleted branches.",
+        tip: "The ultimate safety net in Git."
+      },
+      {
+        id: "git-cherry-pick",
+        category: "advanced",
+        tag: "Pro",
+        level: "Intermediate",
+        title: "Cherry Pick Single Commit",
+        cmd: "git cherry-pick <commit-hash>",
+        desc: "Copies the exact change introduced by a commit from another branch and commits it directly onto your current branch.",
+        tip: "Use 'git cherry-pick -n' to stage without committing."
+      },
+      {
+        id: "git-bisect",
+        category: "advanced",
+        tag: "Pro",
+        level: "Advanced",
+        title: "Binary Search Bug Finder",
+        cmd: "git bisect start && git bisect bad && git bisect good <commit>",
+        desc: "Uses binary search between a known good commit and bad commit to quickly isolate the exact commit that introduced a bug.",
+        tip: "Run 'git bisect reset' when finished."
+      },
+      {
+        id: "git-tag-annotated",
+        category: "advanced",
+        tag: "Pro",
+        level: "Intermediate",
+        title: "Create Annotated Release Tag",
+        cmd: 'git tag -a v1.0.0 -m "Release v1.0.0: Initial launch" && git push origin --tags',
+        desc: "Creates a permanent signed or annotated tag object with message and author info. Required for formal software releases.",
+        tip: "Tags do not push automatically with 'git push'; pass '--tags'."
+      },
+      {
+        id: "git-cat-file",
+        category: "advanced",
+        tag: "Internals",
+        level: "Advanced",
+        title: "Inspect Raw Object in Database",
+        cmd: "git cat-file -p <object-sha>",
+        desc: "Low-level plumbing command that pretty-prints the raw contents of any blob, tree, commit, or tag in .git/objects/.",
+        tip: "Run 'git cat-file -t <sha>' to view object type."
+      },
+      {
+        id: "git-fsck",
+        category: "advanced",
+        tag: "Internals",
+        level: "Advanced",
+        title: "Verify File System & Dangling Commits",
+        cmd: "git fsck --lost-found",
+        desc: "Verifies the connectivity and integrity of objects in the database and lists all orphaned/unreferenced blobs and commits.",
+        tip: "Recovers commits deleted without branch refs."
+      }
+    ];
+
+    // 2. STATE & DOM REFERENCES
+    let currentCategory = "all";
+    let searchQuery = "";
+    const commandsContainer = document.getElementById("commandsContainer");
+    const searchInput = document.getElementById("searchInput");
+    const searchClearBtn = document.getElementById("searchClearBtn");
+    const categoryFilterBar = document.getElementById("categoryFilterBar");
+    const toast = document.getElementById("toast");
+    const toastMsg = document.getElementById("toastMsg");
+
+    // 3. RENDER COMMAND CARDS
+    function renderCommands() {
+      const q = searchQuery.toLowerCase().trim();
+      const filtered = gitCommandsData.filter(item => {
+        const matchesCategory = currentCategory === "all" || item.category === currentCategory;
+        const matchesSearch = !q || 
+          item.title.toLowerCase().includes(q) ||
+          item.cmd.toLowerCase().includes(q) ||
+          item.desc.toLowerCase().includes(q) ||
+          item.tip.toLowerCase().includes(q) ||
+          item.tag.toLowerCase().includes(q);
+        return matchesCategory && matchesSearch;
+      });
+
+      if (filtered.length === 0) {
+        commandsContainer.innerHTML = `
+          <div style="grid-column: 1 / -1; text-align: center; padding: 48px 20px; background: var(--bg-card); border-radius: var(--radius-lg); border: 1px dashed var(--border-color);">
+            <div style="font-size: 2.2rem; margin-bottom: 12px;">🔍</div>
+            <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 8px;">No matching Git commands found</h3>
+            <p style="color: var(--text-muted); font-size: 0.9rem; max-width: 440px; margin: 0 auto 16px;">
+              No results for "<strong>${escapeHtml(searchQuery)}</strong>". Try searching for common terms like "branch", "commit", "undo", "stash", or "rebase".
+            </p>
+            <button class="category-btn" style="display: inline-flex;" onclick="resetSearch()">Clear Search Filter</button>
+          </div>
+        `;
+        return;
+      }
+
+      commandsContainer.innerHTML = filtered.map(c => {
+        let tagClass = "tag-basics";
+        if (c.category === "snapshot") tagClass = "tag-commit";
+        if (c.category === "branch") tagClass = "tag-branch";
+        if (c.category === "undo") tagClass = "tag-undo";
+        if (c.category === "remote") tagClass = "tag-remote";
+        if (c.category === "advanced") tagClass = "tag-advanced";
+
+        return `
+          <article class="cmd-card" id="${c.id}">
+            <div class="cmd-card-header">
+              <span class="cmd-tag ${tagClass}">${c.tag}</span>
+              <span class="cmd-level">${c.level}</span>
+            </div>
+            <h3 class="cmd-title">${highlightText(c.title, q)}</h3>
+            <p class="cmd-desc">${highlightText(c.desc, q)}</p>
+            <div class="code-box">
+              <code>${highlightText(c.cmd, q)}</code>
+              <button class="copy-btn" onclick="copySnippet(this, '${escapeForAttr(c.cmd)}')">
+                <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+                Copy
+              </button>
+            </div>
+            <div class="pro-tip">
+              <span style="color: var(--git-orange);">💡</span>
+              <span><strong>Pro Tip:</strong> ${highlightText(c.tip, q)}</span>
+            </div>
+          </article>
+        `;
+      }).join("");
+    }
+
+    // Helper: update category counts
+    function updateCategoryCounts() {
+      const counts = { all: gitCommandsData.length };
+      gitCommandsData.forEach(c => {
+        counts[c.category] = (counts[c.category] || 0) + 1;
+      });
+
+      for (const [key, count] of Object.entries(counts)) {
+        const el = document.getElementById(`count-${key}`);
+        if (el) el.textContent = count;
+      }
+      const badge = document.getElementById("totalCmdsBadge");
+      if (badge) badge.textContent = gitCommandsData.length + "+";
+    }
+
+    // 4. SEARCH & FILTER INTERACTIVITY
+    searchInput.addEventListener("input", (e) => {
+      searchQuery = e.target.value;
+      searchClearBtn.style.display = searchQuery ? "block" : "none";
+      renderCommands();
+    });
+
+    searchClearBtn.addEventListener("click", () => {
+      resetSearch();
+    });
+
+    function resetSearch() {
+      searchQuery = "";
+      searchInput.value = "";
+      searchClearBtn.style.display = "none";
+      renderCommands();
+      searchInput.focus();
+    }
+
+    function searchFor(term) {
+      searchQuery = term;
+      searchInput.value = term;
+      searchClearBtn.style.display = "block";
+      currentCategory = "all";
+      document.querySelectorAll(".category-btn").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.category === "all");
+      });
+      renderCommands();
+      const commandsEl = document.getElementById("commands");
+      if (commandsEl) commandsEl.scrollIntoView({ behavior: "smooth" });
+    }
+
+    categoryFilterBar.addEventListener("click", (e) => {
+      const btn = e.target.closest(".category-btn");
+      if (!btn) return;
+      document.querySelectorAll(".category-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      currentCategory = btn.dataset.category;
+      renderCommands();
+    });
+
+    // Keyboard shortcut / focus
+    window.addEventListener("keydown", (e) => {
+      if ((e.key === "/" || (e.ctrlKey && e.key === "k")) && document.activeElement !== searchInput && document.activeElement !== termInput) {
+        e.preventDefault();
+        searchInput.focus();
+        searchInput.select();
+      }
+      if (e.key === "Escape" && document.activeElement === searchInput) {
+        resetSearch();
+      }
+    });
+
+    // 5. CLIPBOARD COPY & TOAST
+    function copySnippet(btn, text) {
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(() => showCopiedFeedback(btn, text)).catch(() => fallbackCopy(btn, text));
+      } else {
+        fallbackCopy(btn, text);
+      }
+    }
+
+    function fallbackCopy(btn, text) {
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      textarea.style.position = "fixed";
+      textarea.style.opacity = "0";
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        document.execCommand("copy");
+        showCopiedFeedback(btn, text);
+      } catch (err) {
+        showToast("Press Ctrl+C to copy");
+      }
+      document.body.removeChild(textarea);
+    }
+
+    function showCopiedFeedback(btn, text) {
+      const originalText = btn.innerHTML;
+      btn.classList.add("copied");
+      btn.innerHTML = `✔ Copied!`;
+      showToast(`Copied to clipboard!`);
+      setTimeout(() => {
+        btn.classList.remove("copied");
+        btn.innerHTML = originalText;
+      }, 2000);
+    }
+
+    let toastTimeout;
+    function showToast(msg) {
+      toastMsg.textContent = msg;
+      toast.classList.add("show");
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        toast.classList.remove("show");
+      }, 2400);
+    }
+
+    // String utilities
+    function escapeHtml(str) {
+      return str.replace(/[&<>"']/g, m => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[m]));
+    }
+
+    function escapeForAttr(str) {
+      return str.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+    }
+
+    function highlightText(text, query) {
+      if (!query) return escapeHtml(text);
+      const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(`(${escaped})`, 'gi');
+      return escapeHtml(text).replace(regex, `<mark style="background: rgba(240, 80, 50, 0.35); color: #fff; padding: 1px 3px; border-radius: 3px;">$1</mark>`);
+    }
+
+    // 6. 4-STAGES HIGHLIGHT INTERACTION
+    function highlightStage(index) {
+      const cols = document.querySelectorAll(".stage-column");
+      cols.forEach((col, idx) => {
+        col.classList.toggle("active", idx === index);
+      });
+    }
+
+    // 7. EMERGENCY RESCUE ACCORDION
+    function toggleCrisis(header) {
+      const item = header.closest(".crisis-item");
+      item.classList.toggle("open");
+    }
+
+    // 8. INTERACTIVE TERMINAL SIMULATOR
+    const termInput = document.getElementById("termInput");
+    const termOutput = document.getElementById("termOutput");
+
+    // Simulated repo state
+    const simState = {
+      branch: "main",
+      branches: ["main"],
+      staged: [],
+      unstaged: ["login-controller.js", "styles.css"],
+      untracked: ["auth-middleware.js"],
+      commits: [
+        { hash: "7a2f1b4", msg: "chore: repository setup and initial files", author: "Dev <dev@company.com>" }
+      ]
+    };
+
+    termInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        const cmd = termInput.value.trim();
+        if (cmd) {
+          executeSimCmd(cmd);
+          termInput.value = "";
+        }
+      }
+    });
+
+    function simulateCmd(cmd) {
+      termInput.value = cmd;
+      executeSimCmd(cmd);
+      termInput.value = "";
+    }
+
+    function appendTermLine(html, type = "") {
+      const line = document.createElement("div");
+      line.className = `term-line ${type}`;
+      line.innerHTML = html;
+      termOutput.appendChild(line);
+      termOutput.scrollTop = termOutput.scrollHeight;
+    }
+
+    function executeSimCmd(rawCmd) {
+      appendTermLine(`<span class="term-prompt">user@dev-machine:~/project$</span> <span class="term-cmd">${escapeHtml(rawCmd)}</span>`);
+
+      const cmd = rawCmd.trim();
+      const parts = cmd.split(/\s+/);
+
+      if (cmd === "clear") {
+        termOutput.innerHTML = "";
+        return;
+      }
+
+      if (cmd === "help") {
+        appendTermLine(`Available simulated commands:
+  <span class="term-success">git status</span>              - Show file states
+  <span class="term-success">git add .</span>               - Stage all changes
+  <span class="term-success">git commit -m "&lt;msg&gt;"</span>      - Commit staged changes
+  <span class="term-success">git branch</span>              - List branches
+  <span class="term-success">git switch -c &lt;branch&gt;</span>   - Create & switch branch
+  <span class="term-success">git switch &lt;branch&gt;</span>      - Switch branch
+  <span class="term-success">git log</span> / <span class="term-success">git log --oneline</span> - Show commit log
+  <span class="term-success">clear</span>                   - Clear terminal`);
+        return;
+      }
+
+      if (parts[0] !== "git") {
+        appendTermLine(`bash: command not found: ${parts[0]}. Type 'git' commands or 'help'.`, "term-danger");
+        return;
+      }
+
+      const sub = parts[1];
+
+      // git status
+      if (sub === "status") {
+        let out = `On branch <span style="color: #38bdf8; font-weight: 600;">${simState.branch}</span>\nYour branch is up to date with 'origin/${simState.branch}'.\n\n`;
+
+        if (simState.staged.length > 0) {
+          out += `Changes to be committed:\n  (use "git restore --staged <file>..." to unstage)\n`;
+          simState.staged.forEach(f => {
+            out += `\t<span class="term-success">new file:   ${f}</span>\n`;
+          });
+          out += `\n`;
+        }
+
+        if (simState.unstaged.length > 0) {
+          out += `Changes not staged for commit:\n  (use "git add <file>..." to update what will be committed)\n`;
+          simState.unstaged.forEach(f => {
+            out += `\t<span class="term-danger">modified:   ${f}</span>\n`;
+          });
+          out += `\n`;
+        }
+
+        if (simState.untracked.length > 0) {
+          out += `Untracked files:\n  (use "git add <file>..." to include in what will be committed)\n`;
+          simState.untracked.forEach(f => {
+            out += `\t<span class="term-danger">${f}</span>\n`;
+          });
+          out += `\n`;
+        }
+
+        if (simState.staged.length === 0 && simState.unstaged.length === 0 && simState.untracked.length === 0) {
+          out += `nothing to commit, working tree clean`;
+        }
+
+        appendTermLine(out, "term-output");
+        return;
+      }
+
+      // git add
+      if (sub === "add") {
+        const target = parts.slice(2).join(" ");
+        if (target === "." || target === "-A" || target === "*") {
+          simState.staged = [...simState.staged, ...simState.unstaged, ...simState.untracked];
+          simState.unstaged = [];
+          simState.untracked = [];
+          appendTermLine(`✔ Successfully staged all changes. Run 'git status' or 'git commit'.`, "term-success");
+        } else if (target) {
+          simState.staged.push(target);
+          appendTermLine(`✔ Staged '${target}'.`, "term-success");
+        } else {
+          appendTermLine(`Nothing specified, nothing added. Maybe you wanted to say 'git add .'?`, "term-warn");
+        }
+        return;
+      }
+
+      // git commit
+      if (sub === "commit") {
+        if (simState.staged.length === 0) {
+          appendTermLine(`On branch ${simState.branch}\nno changes added to commit (use "git add" to stage)`, "term-warn");
+          return;
+        }
+
+        let msg = "feat: update project files";
+        const mIdx = cmd.indexOf("-m");
+        if (mIdx !== -1) {
+          const match = cmd.match(/-m\s+["']([^"']+)["']/);
+          if (match) msg = match[1];
+        }
+
+        const newHash = Math.random().toString(16).substring(2, 9);
+        simState.commits.unshift({
+          hash: newHash,
+          msg: msg,
+          author: "Dev <dev@company.com>"
+        });
+
+        const count = simState.staged.length;
+        simState.staged = [];
+        appendTermLine(`[${simState.branch} ${newHash}] ${msg}\n ${count} file${count > 1 ? 's' : ''} changed, +142 insertions(+)`, "term-success");
+        return;
+      }
+
+      // git branch
+      if (sub === "branch") {
+        if (parts.length === 2) {
+          let out = "";
+          simState.branches.forEach(b => {
+            if (b === simState.branch) {
+              out += `<span class="term-success">* ${b}</span>\n`;
+            } else {
+              out += `  ${b}\n`;
+            }
+          });
+          appendTermLine(out, "term-output");
+        } else {
+          const newBranch = parts[2];
+          if (!simState.branches.includes(newBranch)) {
+            simState.branches.push(newBranch);
+            appendTermLine(`Branch '${newBranch}' created.`, "term-success");
+          } else {
+            appendTermLine(`fatal: a branch named '${newBranch}' already exists`, "term-danger");
+          }
+        }
+        return;
+      }
+
+      // git switch or git checkout
+      if (sub === "switch" || sub === "checkout") {
+        let isCreate = parts.includes("-c") || parts.includes("-b");
+        let branchName = parts[parts.length - 1];
+
+        if (isCreate) {
+          if (!simState.branches.includes(branchName)) {
+            simState.branches.push(branchName);
+          }
+          simState.branch = branchName;
+          appendTermLine(`Switched to a new branch '${branchName}'`, "term-success");
+        } else if (simState.branches.includes(branchName)) {
+          simState.branch = branchName;
+          appendTermLine(`Switched to branch '${branchName}'`, "term-success");
+        } else {
+          appendTermLine(`fatal: '${branchName}' did not match any file(s) known to git. Use '-c' to create a new branch.`, "term-danger");
+        }
+        return;
+      }
+
+      // git log
+      if (sub === "log") {
+        let out = "";
+        simState.commits.forEach(c => {
+          if (parts.includes("--oneline")) {
+            out += `<span class="term-warn">${c.hash}</span> ${c.msg}\n`;
+          } else {
+            out += `<span class="term-warn">commit ${c.hash}8491c39485</span> (HEAD -> <span style="color: #38bdf8;">${simState.branch}</span>)\nAuthor: ${c.author}\nDate:   ${new Date().toDateString()}\n\n    ${c.msg}\n\n`;
+          }
+        });
+        appendTermLine(out, "term-output");
+        return;
+      }
+
+      appendTermLine(`Simulation supported: git status, git add, git commit, git branch, git switch, git log, help, clear.`, "term-warn");
+    }
+
+    // 9. INTERACTIVE QUIZ LOGIC
+    const quizQuestions = [
+      {
+        question: "Which command moves a commit backwards without losing your modified code, keeping it staged in the Index?",
+        options: [
+          "git reset --hard HEAD~1",
+          "git reset --soft HEAD~1",
+          "git revert HEAD",
+          "git restore --staged ."
+        ],
+        correct: 1,
+        explanation: "Correct! 'git reset --soft HEAD~1' rewinds the commit pointer while preserving all code changes in the staging area (index), ready to be committed again."
+      },
+      {
+        question: "Why is 'git push --force-with-lease' recommended over 'git push --force'?",
+        options: [
+          "It compresses commit objects before uploading.",
+          "It prevents overwriting teammates' work if someone pushed new commits to the branch since your last fetch.",
+          "It automatically resolves merge conflicts using AI.",
+          "It only forces pushes to protected main branches."
+        ],
+        correct: 1,
+        explanation: "Spot on! '--force-with-lease' refuses to force-push if the remote ref has moved past your local remote-tracking ref, protecting teammates' commits from destruction."
+      },
+      {
+        question: "What does Git actually store in a 'Blob' object?",
+        options: [
+          "File contents only (compressed with zlib).",
+          "Filename, file permissions, and directory paths.",
+          "Commit author name and commit message.",
+          "The diff differences between parent and child."
+        ],
+        correct: 0,
+        explanation: "Exactly! A Git Blob holds ONLY raw binary file contents. Filenames, directory structures, and file modes are stored separately in 'Tree' objects."
+      },
+      {
+        question: "If you accidentally ran 'git reset --hard' and deleted committed work, which command can locate the lost commit hash?",
+        options: [
+          "git status -v",
+          "git clean -fd",
+          "git reflog",
+          "git checkout --force"
+        ],
+        correct: 2,
+        explanation: "Bingo! 'git reflog' tracks every update to HEAD (commits, checkouts, rebases) over the last 30-90 days, enabling recovery of orphaned commits."
+      },
+      {
+        question: "What state is your Git repo in when HEAD points directly to a commit SHA rather than a branch name?",
+        options: [
+          "Fast-forward merge state",
+          "Detached HEAD state",
+          "Rebase conflict freeze",
+          "Upstream out-of-sync error"
+        ],
+        correct: 1,
+        explanation: "Correct! A 'detached HEAD' means HEAD points directly to a commit. Commits made here will be orphaned unless you attach a branch with 'git switch -c <name>'."
+      }
+    ];
+
+    let currentQuizIndex = 0;
+    let quizScore = 0;
+    let hasAnsweredCurrent = false;
+
+    const quizQuestionText = document.getElementById("quizQuestionText");
+    const quizOptionsContainer = document.getElementById("quizOptionsContainer");
+    const quizFeedback = document.getElementById("quizFeedback");
+    const quizNextBtn = document.getElementById("quizNextBtn");
+    const quizQuestionCount = document.getElementById("quizQuestionCount");
+    const quizScoreText = document.getElementById("quizScoreText");
+    const quizProgressFill = document.getElementById("quizProgressFill");
+
+    function loadQuizQuestion() {
+      hasAnsweredCurrent = false;
+      const q = quizQuestions[currentQuizIndex];
+      quizQuestionText.textContent = q.question;
+      quizQuestionCount.textContent = `Question ${currentQuizIndex + 1} of ${quizQuestions.length}`;
+      quizProgressFill.style.width = `${((currentQuizIndex + 1) / quizQuestions.length) * 100}%`;
+      quizScoreText.textContent = `Score: ${quizScore}/${currentQuizIndex}`;
+
+      quizFeedback.className = "quiz-feedback";
+      quizFeedback.textContent = "";
+      quizNextBtn.style.display = "none";
+
+      quizOptionsContainer.innerHTML = q.options.map((opt, i) => `
+        <button class="quiz-option-btn" onclick="selectQuizAnswer(${i})">
+          <span style="font-family: var(--font-mono); font-weight: 700; color: var(--git-blue);">${String.fromCharCode(65 + i)}.</span>
+          <span>${escapeHtml(opt)}</span>
+        </button>
+      `).join("");
+    }
+
+    function selectQuizAnswer(index) {
+      if (hasAnsweredCurrent) return;
+      hasAnsweredCurrent = true;
+
+      const q = quizQuestions[currentQuizIndex];
+      const buttons = quizOptionsContainer.querySelectorAll(".quiz-option-btn");
+
+      buttons.forEach((btn, idx) => {
+        btn.disabled = true;
+        if (idx === q.correct) {
+          btn.classList.add("correct");
+        } else if (idx === index) {
+          btn.classList.add("wrong");
+        }
+      });
+
+      if (index === q.correct) {
+        quizScore++;
+        quizFeedback.className = "quiz-feedback show success";
+        quizFeedback.innerHTML = `<strong>✔ Correct!</strong> ${q.explanation}`;
+      } else {
+        quizFeedback.className = "quiz-feedback show fail";
+        quizFeedback.innerHTML = `<strong>✖ Incorrect.</strong> ${q.explanation}`;
+      }
+
+      quizScoreText.textContent = `Score: ${quizScore}/${currentQuizIndex + 1}`;
+      quizNextBtn.style.display = "block";
+      if (currentQuizIndex === quizQuestions.length - 1) {
+        quizNextBtn.textContent = "View Final Results 🏆";
+      }
+    }
+
+    function nextQuizQuestion() {
+      if (currentQuizIndex < quizQuestions.length - 1) {
+        currentQuizIndex++;
+        loadQuizQuestion();
+      } else {
+        showQuizResults();
+      }
+    }
+
+    function showQuizResults() {
+      const percentage = Math.round((quizScore / quizQuestions.length) * 100);
+      let title = "Git Apprentice 🛠";
+      if (percentage >= 80) title = "Git Mastermind 🚀";
+      else if (percentage >= 60) title = "Git Pro Engineer 💻";
+
+      quizOptionsContainer.innerHTML = `
+        <div style="text-align: center; padding: 24px;">
+          <div style="font-size: 3rem; margin-bottom: 12px;">🎉</div>
+          <h4 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 8px;">${title}</h4>
+          <p style="color: var(--text-muted); font-size: 1.1rem; margin-bottom: 24px;">
+            You scored <strong>${quizScore} out of ${quizQuestions.length}</strong> (${percentage}%)
+          </p>
+          <button class="category-btn active" style="margin: 0 auto; display: inline-flex;" onclick="restartQuiz()">Restart Quiz ↺</button>
+        </div>
+      `;
+      quizFeedback.className = "quiz-feedback";
+      quizNextBtn.style.display = "none";
+      quizQuestionText.textContent = "Quiz Completed!";
+    }
+
+    function restartQuiz() {
+      currentQuizIndex = 0;
+      quizScore = 0;
+      loadQuizQuestion();
+    }
+
+    // Gitconfig snippet
+    const gitConfigText = `[alias]
+  # Visual graph log
+  lg = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative
+  
+  # Status & shortcuts
+  st = status -sb
+  co = checkout
+  br = branch
+  ci = commit
+  
+  # Safe undo & stage
+  unstage = restore --staged
+  discard = restore
+  undo = reset --soft HEAD~1
+  amend = commit --amend --no-edit
+
+  # Show all aliases
+  aliases = config --get-regexp alias
+
+[init]
+  defaultBranch = main
+
+[pull]
+  rebase = true
+
+[push]
+  autoSetupRemote = true`;
+
+    // 10. INITIALIZATION
+    window.addEventListener("DOMContentLoaded", () => {
+      updateCategoryCounts();
+      renderCommands();
+      loadQuizQuestion();
+    });
+  </script>
+</body>
+</html>
